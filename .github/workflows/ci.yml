@@ -22,6 +22,9 @@ jobs:
       - name: Build Docker containers
         run: docker compose build
 
+      - name: Ensure the script has execution permission
+        run: chmod +x ./coding_style_check.sh ./testing.sh
+
       - name: Run coding style check
         run: docker compose run --rm memonest ./coding_style_check.sh
 
