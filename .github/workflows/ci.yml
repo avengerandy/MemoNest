@@ -20,10 +20,10 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker containers
-        run: docker-compose build
+        run: docker compose build
 
       - name: Run coding style check
-        run: docker-compose run --rm memonest ./coding_style_check.sh
+        run: docker compose run --rm memonest ./coding_style_check.sh
 
       - name: Run tests
-        run: docker-compose run --rm memonest ./testing.sh
+        run: docker compose run --rm memonest ./testing.sh
