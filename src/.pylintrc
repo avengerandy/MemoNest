@@ -1,0 +1,3 @@
+[MASTER]
+max-attributes=10
+# R0902: too-many-instance-attributes (%s/max-attributes)
