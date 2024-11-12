@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from sqlite3 import Connection
 from typing import List, Optional
 
-from src.entity.memo import Memo, MemoStatusEnum
+from src.entity.memo import Memo
 from src.repository.common import RepositoryError, RepositoryErrorCode
 
 
@@ -91,23 +91,8 @@ class SQLiteMemoRepository(MemoRepositoryInterface):
             with self.connect:
                 cursor = self.connect.cursor()
                 cursor.execute(
-                    (
-                        "INSERT INTO memos ("
-                        "title, description, due_date, "
-                        "total_pomodoros, now_pomodoros, status, "
-                        "create_date, update_date) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-                    ),
-                    (
-                        memo.title,
-                        memo.description,
-                        memo.due_date.isoformat(),
-                        memo.total_pomodoros,
-                        memo.now_pomodoros,
-                        memo.status.value,
-                        create_date.isoformat(),
-                        update_date.isoformat(),
-                    ),
+                    "INSERT INTO memos (title, create_date, update_date) VALUES (?, ?, ?)",
+                    (memo.title, create_date.isoformat(), update_date.isoformat()),
                 )
                 new_id = cursor.lastrowid
                 return new_id
@@ -123,23 +108,8 @@ class SQLiteMemoRepository(MemoRepositoryInterface):
             with self.connect:
                 cursor = self.connect.cursor()
                 cursor.execute(
-                    (
-                        "UPDATE memos SET "
-                        "title = ?, description = ?, due_date = ?, "
-                        "total_pomodoros = ?, now_pomodoros = ?, status = ?, "
-                        "update_date = ? "
-                        "WHERE id = ?"
-                    ),
-                    (
-                        memo.title,
-                        memo.description,
-                        memo.due_date.isoformat(),
-                        memo.total_pomodoros,
-                        memo.now_pomodoros,
-                        memo.status.value,
-                        update_date.isoformat(),
-                        memo.id,
-                    ),
+                    "UPDATE memos SET title = ?, update_date = ? WHERE id = ?",
+                    (memo.title, update_date.isoformat(), memo.id),
                 )
         except Exception as error:
             error_code = RepositoryErrorCode.FAILED_TO_UPDATE_MEMO
@@ -168,13 +138,8 @@ class SQLiteMemoRepository(MemoRepositoryInterface):
                     return Memo(
                         id=row[0],
                         title=row[1],
-                        description=row[2],
-                        due_date=datetime.datetime.fromisoformat(row[3]),
-                        total_pomodoros=row[4],
-                        now_pomodoros=row[5],
-                        status=MemoStatusEnum(row[6]),
-                        create_date=datetime.datetime.fromisoformat(row[7]),
-                        update_date=datetime.datetime.fromisoformat(row[8]),
+                        create_date=datetime.datetime.fromisoformat(row[2]),
+                        update_date=datetime.datetime.fromisoformat(row[3]),
                     )
                 return None
         except Exception as error:
@@ -193,13 +158,8 @@ class SQLiteMemoRepository(MemoRepositoryInterface):
                     Memo(
                         id=row[0],
                         title=row[1],
-                        description=row[2],
-                        due_date=datetime.datetime.fromisoformat(row[3]),
-                        total_pomodoros=row[4],
-                        now_pomodoros=row[5],
-                        status=MemoStatusEnum(row[6]),
-                        create_date=datetime.datetime.fromisoformat(row[7]),
-                        update_date=datetime.datetime.fromisoformat(row[8]),
+                        create_date=datetime.datetime.fromisoformat(row[2]),
+                        update_date=datetime.datetime.fromisoformat(row[3]),
                     )
                     for row in rows
                 ]

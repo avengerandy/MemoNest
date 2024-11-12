@@ -2,7 +2,7 @@ import datetime
 import unittest
 from unittest.mock import MagicMock, Mock
 
-from src.entity.memo import Memo, MemoStatusEnum
+from src.entity.memo import Memo
 from src.repository.common import RepositoryError
 from src.repository.memo_repository import SQLiteMemoRepository
 
@@ -23,14 +23,7 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         )
 
     def test_create_memo(self):
-        memo = Memo(
-            title="New Memo",
-            description="Memo description.",
-            due_date=datetime.datetime.now(),
-            status=MemoStatusEnum.TODO,
-            total_pomodoros=5,
-            now_pomodoros=2,
-        )
+        memo = Memo(title="New Memo")
 
         cursor_mock = Mock()
         cursor_mock.lastrowid = 1
@@ -43,37 +36,24 @@ class TestSQLiteMemoRepository(unittest.TestCase):
 
         sql, params = cursor_mock.execute.call_args[0]
         expected_sql = (
-            "INSERT INTO memos (title, description, due_date, total_pomodoros, "
-            "now_pomodoros, status, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO memos (title, create_date, update_date) VALUES (?, ?, ?)"
         )
         expected_params = (
             memo.title,
-            memo.description,
-            memo.due_date.isoformat(),
-            memo.total_pomodoros,
-            memo.now_pomodoros,
-            memo.status.value,
             self.now.isoformat(),
             self.now.isoformat(),
         )
         self.assertEqual(sql, expected_sql)
-        self.assertEqual(params[:6], expected_params[:6])
+        self.assertEqual(params[0], expected_params[0])
 
-        create_date = datetime.datetime.fromisoformat(params[6])
-        update_date = datetime.datetime.fromisoformat(params[7])
+        create_date = datetime.datetime.fromisoformat(params[1])
+        update_date = datetime.datetime.fromisoformat(params[2])
         self.assert_time_almost_equal(self.now, create_date)
         self.assert_time_almost_equal(self.now, update_date)
         self.assertEqual(new_id, 1)
 
     def test_create_memo_error(self):
-        memo = Memo(
-            title="New Memo",
-            description="Memo description.",
-            due_date=datetime.datetime.now(),
-            status=MemoStatusEnum.TODO,
-            total_pomodoros=5,
-            now_pomodoros=2,
-        )
+        memo = Memo(title="New Memo")
 
         original_exception = Exception("Database error")
         self.mock_connection.cursor.side_effect = original_exception
@@ -85,15 +65,7 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         self.assertEqual(context.exception.original_exception, original_exception)
 
     def test_update_memo(self):
-        memo = Memo(
-            id=1,
-            title="Updated Memo",
-            description="Updated description.",
-            due_date=datetime.datetime.now(),
-            status=MemoStatusEnum.DOING,
-            total_pomodoros=5,
-            now_pomodoros=2,
-        )
+        memo = Memo(title="Updated Memo", id=1)
 
         cursor_mock = Mock()
         self.mock_connection.cursor.return_value = cursor_mock
@@ -104,37 +76,21 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         cursor_mock.execute.assert_called_once()
 
         sql, params = cursor_mock.execute.call_args[0]
-        expected_sql = (
-            "UPDATE memos SET title = ?, description = ?, due_date = ?, "
-            "total_pomodoros = ?, now_pomodoros = ?, status = ?, update_date = ? WHERE id = ?"
-        )
+        expected_sql = "UPDATE memos SET title = ?, update_date = ? WHERE id = ?"
         expected_params = (
             memo.title,
-            memo.description,
-            memo.due_date.isoformat(),
-            memo.total_pomodoros,
-            memo.now_pomodoros,
-            memo.status.value,
             self.now.isoformat(),
             memo.id,
         )
         self.assertEqual(sql, expected_sql)
-        self.assertEqual(params[:6], expected_params[:6])
-        self.assertEqual(params[-1], expected_params[-1])
+        self.assertEqual(params[0], expected_params[0])
+        self.assertEqual(params[2], expected_params[2])
 
-        update_date = datetime.datetime.fromisoformat(params[6])
+        update_date = datetime.datetime.fromisoformat(params[1])
         self.assert_time_almost_equal(self.now, update_date)
 
     def test_update_memo_error(self):
-        memo = Memo(
-            id=1,
-            title="Updated Memo",
-            description="Updated description.",
-            due_date=datetime.datetime.now(),
-            total_pomodoros=5,
-            now_pomodoros=2,
-            status=MemoStatusEnum.DOING,
-        )
+        memo = Memo(title="Updated Memo", id=1)
 
         original_exception = Exception("Database error")
         self.mock_connection.cursor.side_effect = original_exception
@@ -149,11 +105,6 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         memo = Memo(
             id=1,
             title="Memo to delete",
-            description="This memo will be deleted.",
-            due_date=datetime.datetime.now(),
-            total_pomodoros=5,
-            now_pomodoros=2,
-            status=MemoStatusEnum.DONE,
             create_date=datetime.datetime.now(),
             update_date=datetime.datetime.now(),
         )
@@ -176,11 +127,6 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         memo = Memo(
             id=1,
             title="Memo to delete",
-            description="This memo will be deleted.",
-            due_date=datetime.datetime.now(),
-            total_pomodoros=5,
-            now_pomodoros=2,
-            status=MemoStatusEnum.DONE,
             create_date=datetime.datetime.now(),
             update_date=datetime.datetime.now(),
         )
@@ -200,11 +146,6 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         cursor_mock.fetchone.return_value = (
             1,
             "Sample Memo",
-            "Memo description",
-            datetime.datetime.now().isoformat(),
-            5,
-            2,
-            "todo",
             datetime.datetime.now().isoformat(),
             datetime.datetime.now().isoformat(),
         )
@@ -240,22 +181,12 @@ class TestSQLiteMemoRepository(unittest.TestCase):
             (
                 1,
                 "Memo 1",
-                "Description 1",
-                datetime.datetime.now().isoformat(),
-                5,
-                2,
-                "todo",
                 datetime.datetime.now().isoformat(),
                 datetime.datetime.now().isoformat(),
             ),
             (
                 2,
                 "Memo 2",
-                "Description 2",
-                datetime.datetime.now().isoformat(),
-                3,
-                1,
-                "doing",
                 datetime.datetime.now().isoformat(),
                 datetime.datetime.now().isoformat(),
             ),
