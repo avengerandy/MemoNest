@@ -7,7 +7,11 @@ from src.interaction import ConsoleOutput, MemoNest, OutputHandler
 
 class TestMemoNest(unittest.TestCase):
     def setUp(self):
-        self.memo_nest = MemoNest()
+        class PassImplMemoNest(MemoNest):
+            def create_memo(self, data: dict) -> None:
+                pass
+
+        self.memo_nest = PassImplMemoNest()
         self.mock_output_handler = Mock(spec=OutputHandler)
         self.memo_nest.set_output(self.mock_output_handler)
 

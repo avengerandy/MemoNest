@@ -62,8 +62,12 @@ class MemoNest(ABC):
         if self.output_handler is not None:
             self.output_handler.output(data)
 
-    def error(self, code: int, data: str) -> None:
+    def error(self, code: int, message: str) -> None:
         """Delegates the task of outputting error data to the output handler."""
 
         if self.output_handler is not None:
-            self.output_handler.error_output(code, data)
+            self.output_handler.error_output(code, message)
+
+    @abstractmethod
+    def create_memo(self, data: dict) -> None:
+        """Creates a new memo with the given data."""
