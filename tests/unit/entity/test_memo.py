@@ -43,6 +43,18 @@ class TestMemo(unittest.TestCase):
         self.assertEqual(memo_complete.update_date, TestMemo.update_date)
         self.assertEqual(memo_complete.id, TestMemo.id)
 
+    def test_to_dict(self):
+        memo_dict = Memo(
+            title="Complete Memo",
+            create_date=TestMemo.create_date,
+            update_date=TestMemo.update_date,
+            id=TestMemo.id,
+        ).to_dict()
+        self.assertEqual(memo_dict["title"], "Complete Memo")
+        self.assertEqual(memo_dict["create_date"], TestMemo.create_date)
+        self.assertEqual(memo_dict["update_date"], TestMemo.update_date)
+        self.assertEqual(memo_dict["id"], TestMemo.id)
+
 
 if __name__ == "__main__":
     unittest.main()

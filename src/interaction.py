@@ -71,3 +71,19 @@ class MemoNest(ABC):
     @abstractmethod
     def create_memo(self, data: dict) -> None:
         """Creates a new memo with the given data."""
+
+    @abstractmethod
+    def get_memo(self, data: dict) -> None:
+        """Retrieves a memo with the given data."""
+
+    @abstractmethod
+    def get_memos(self) -> None:
+        """Retrieves all memos."""
+
+    @abstractmethod
+    def update_memo(self, data: dict) -> None:
+        """Updates an existing memo with the given data."""
+
+    @abstractmethod
+    def delete_memo(self, data: dict) -> None:
+        """Deletes a memo with the given data."""

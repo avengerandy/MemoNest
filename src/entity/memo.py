@@ -25,3 +25,12 @@ class Memo:
     def is_create(self) -> bool:
         """Check if the memo has been created."""
         return self.id is not None
+
+    def to_dict(self) -> dict:
+        """Convert the memo to a dictionary."""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "create_date": self.create_date,
+            "update_date": self.update_date,
+        }

@@ -11,6 +11,18 @@ class TestMemoNest(unittest.TestCase):
             def create_memo(self, data: dict) -> None:
                 pass
 
+            def get_memo(self, data: dict) -> None:
+                pass
+
+            def get_memos(self) -> None:
+                pass
+
+            def update_memo(self, data: dict) -> None:
+                pass
+
+            def delete_memo(self, data: dict) -> None:
+                pass
+
         self.memo_nest = PassImplMemoNest()
         self.mock_output_handler = Mock(spec=OutputHandler)
         self.memo_nest.set_output(self.mock_output_handler)
