@@ -1,13 +1,20 @@
+import datetime
 import unittest
+from enum import Enum
 from typing import List
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock, patch
 
 from src.formatter.common import (
+    CreateFieldFormatter,
+    DateFormatter,
+    EnumFormatter,
     Formatter,
     FormatterError,
     FormatterErrorCode,
     FormatterFactory,
     FormatterHelper,
+    IntegerFormatter,
+    StringFormatter,
 )
 
 
@@ -107,18 +114,170 @@ class TestFormatter(unittest.TestCase):
         self.assertTrue(result["handled"])
 
 
-class TestFormatterFactoryTests(unittest.TestCase):
+class TestDateFormatter(unittest.TestCase):
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format(self, mock_formatter_helper):
+        data = {"date_field": "2021-01-01"}
+        date_formatter = DateFormatter("date_field")
+
+        result = date_formatter.format(data)
+
+        self.assertEqual(
+            result["date_field"],
+            datetime.date(2021, 1, 1),
+        )
+        mock_formatter_helper.validate_field_exist.assert_called_once_with(
+            data, "date_field"
+        )
+        mock_formatter_helper.validate_field_format_with_regex.assert_called_once_with(
+            data,
+            "date_field",
+            DateFormatter.DATE_REGEX,
+        )
+
+    @patch("src.formatter.common.FormatterHelper")
+    @patch("src.formatter.common.datetime")
+    def test_format_invalid_field_value(self, mock_datetime, mock_formatter_helper):
+        data = {"date_field": "not_a_date"}
+        date_formatter = DateFormatter("date_field")
+        mock_datetime.strptime.side_effect = ValueError("Invalid date format")
+
+        date_formatter.format(data)
+
+        mock_datetime.strptime.assert_called_once_with(
+            "not_a_date",
+            DateFormatter.DATE_FORMAT,
+        )
+        mock_formatter_helper.raise_field_error.assert_called_once()
+        args = mock_formatter_helper.raise_field_error.call_args[0]
+        self.assertEqual(args[0], "date_field")
+        self.assertEqual(args[1], FormatterErrorCode.INVALID_FIELD_VALUE)
+        self.assertIsInstance(args[2], ValueError)
+
+
+class TestIntegerFormatter(unittest.TestCase):
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format(self, mock_formatter_helper):
+        data = {"integer_field": "123"}
+        integer_formatter = IntegerFormatter("integer_field")
+
+        result = integer_formatter.format(data)
+
+        self.assertEqual(result["integer_field"], 123)
+        mock_formatter_helper.validate_field_exist.assert_called_once_with(
+            data, "integer_field"
+        )
+        mock_formatter_helper.validate_field_format_with_regex.assert_called_once_with(
+            data,
+            "integer_field",
+            IntegerFormatter.INT_REGEX,
+        )
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format_invalid_field_value(self, mock_formatter_helper):
+        data = {"integer_field": "not_an_integer"}
+        integer_formatter = IntegerFormatter("integer_field")
+
+        integer_formatter.format(data)
+
+        mock_formatter_helper.raise_field_error.assert_called_once()
+        args = mock_formatter_helper.raise_field_error.call_args[0]
+        self.assertEqual(args[0], "integer_field")
+        self.assertEqual(args[1], FormatterErrorCode.INVALID_FIELD_VALUE)
+        self.assertIsInstance(args[2], ValueError)
+
+
+class TestStringFormatter(unittest.TestCase):
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format(self, mock_formatter_helper):
+        data = {"string_field": 123}
+        string_formatter = StringFormatter("string_field")
+
+        result = string_formatter.format(data)
+
+        self.assertEqual(result["string_field"], "123")
+        mock_formatter_helper.validate_field_exist.assert_called_once_with(
+            data, "string_field"
+        )
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format_invalid_field_value(self, mock_formatter_helper):
+        object_without_str = MagicMock()
+        object_without_str.__str__.side_effect = ValueError()
+        data = {"string_field": object_without_str}
+        string_formatter = StringFormatter("string_field")
+
+        string_formatter.format(data)
+
+        mock_formatter_helper.raise_field_error.assert_called_once()
+        args = mock_formatter_helper.raise_field_error.call_args[0]
+        self.assertEqual(args[0], "string_field")
+        self.assertEqual(args[1], FormatterErrorCode.INVALID_FIELD_VALUE)
+
+
+class TestEnumFormatter(unittest.TestCase):
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format(self, mock_formatter_helper):
+        class TestEnum(Enum):
+            VALUE1 = "value1"
+            VALUE2 = "value2"
+
+        data = {"enum_field": "value1"}
+        enum_formatter = EnumFormatter("enum_field", TestEnum)
+
+        result = enum_formatter.format(data)
+
+        self.assertEqual(result["enum_field"], TestEnum.VALUE1)
+        mock_formatter_helper.validate_field_exist.assert_called_once_with(
+            data, "enum_field"
+        )
+
+    @patch("src.formatter.common.FormatterHelper")
+    def test_format_invalid_field_value(self, mock_formatter_helper):
+        class TestEnum(Enum):
+            VALUE1 = "value1"
+            VALUE2 = "value2"
+
+        data = {"enum_field": "invalid_value"}
+        enum_formatter = EnumFormatter("enum_field", TestEnum)
+
+        enum_formatter.format(data)
+
+        mock_formatter_helper.raise_field_error.assert_called_once()
+        args = mock_formatter_helper.raise_field_error.call_args[0]
+        self.assertEqual(args[0], "enum_field")
+        self.assertEqual(args[1], FormatterErrorCode.INVALID_FIELD_VALUE)
+
+
+class TestCreateFieldFormatter(unittest.TestCase):
+
+    def test_format(self):
+        data = {}
+        field_name = "new_field"
+        field_value = "default_value"
+        create_field_formatter = CreateFieldFormatter(field_name, field_value)
+
+        result = create_field_formatter.format(data)
+
+        self.assertEqual(result[field_name], field_value)
+
+
+class TestFormatterFactory(unittest.TestCase):
 
     def test_create(self):
         formatter1 = Mock(spec=Formatter)
         formatter2 = Mock(spec=Formatter)
         formatter3 = Mock(spec=Formatter)
 
-        class TestFormatterFactory(FormatterFactory):
+        class TestFormatterFactorySubClass(FormatterFactory):
             def get_formatters(self) -> List[Formatter]:
                 return [formatter1, formatter2, formatter3]
 
-        test_formatter_factory = TestFormatterFactory()
+        test_formatter_factory = TestFormatterFactorySubClass()
         formatter = test_formatter_factory.create()
 
         self.assertEqual(formatter, formatter1)

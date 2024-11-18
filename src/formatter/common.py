@@ -107,14 +107,14 @@ class DateFormatter(Formatter):
 
         FormatterHelper.validate_field_exist(data, self.field_name)
         FormatterHelper.validate_field_format_with_regex(
-            data, self.field_name, DataFormatter.DATE_REGEX
+            data, self.field_name, DateFormatter.DATE_REGEX
         )
 
         try:
             data[self.field_name] = datetime.strptime(
-                data[self.field_name], DataFormatter.DATE_FORMAT
+                data[self.field_name], DateFormatter.DATE_FORMAT
             ).date()
-        except ValueError as error:
+        except (ValueError, TypeError) as error:
             error_code = FormatterErrorCode.INVALID_FIELD_VALUE
             FormatterHelper.raise_field_error(self.field_name, error_code, error)
 
@@ -140,7 +140,7 @@ class IntegerFormatter(Formatter):
 
         try:
             data[self.field_name] = int(data[self.field_name])
-        except ValueError as error:
+        except (ValueError, TypeError) as error:
             error_code = FormatterErrorCode.INVALID_FIELD_VALUE
             FormatterHelper.raise_field_error(self.field_name, error_code, error)
 
@@ -161,7 +161,7 @@ class StringFormatter(Formatter):
 
         try:
             data[self.field_name] = str(data[self.field_name])
-        except ValueError as error:
+        except (ValueError, TypeError, AttributeError) as error:
             error_code = FormatterErrorCode.INVALID_FIELD_VALUE
             FormatterHelper.raise_field_error(self.field_name, error_code, error)
 
@@ -179,9 +179,11 @@ class EnumFormatter(Formatter):
     def format(self, data) -> dict:
         """Convert a field value to an enum value."""
 
+        FormatterHelper.validate_field_exist(data, self.field_name)
+
         try:
             data[self.field_name] = self.enum_class(data[self.field_name])
-        except ValueError as error:
+        except (ValueError, TypeError) as error:
             error_code = FormatterErrorCode.INVALID_FIELD_VALUE
             FormatterHelper.raise_field_error(self.field_name, error_code, error)
 
