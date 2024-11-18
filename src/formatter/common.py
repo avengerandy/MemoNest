@@ -92,7 +92,7 @@ class Formatter(ABC):
         self._next_formatter = next_formatter
 
 
-class DataFormatter(Formatter):
+class DateFormatter(Formatter):
     """A Formatter class for converting a field value to a date."""
 
     DATE_REGEX = r"\d{4}-\d{2}-\d{2}"
