@@ -164,6 +164,24 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         self.assertIsNotNone(memo)
         self.assertEqual(memo.title, "Sample Memo")
 
+    def test_get_memo_not_found(self):
+        cursor_mock = Mock()
+        self.mock_connection.cursor.return_value = cursor_mock
+        cursor_mock.fetchone.return_value = None
+
+        memo = self.repository.get(1)
+
+        self.mock_connection.cursor.assert_called_once()
+        cursor_mock.execute.assert_called_once()
+
+        sql, params = cursor_mock.execute.call_args[0]
+        expected_sql = "SELECT * FROM memos WHERE id = ?"
+        expected_params = (1,)
+        self.assertEqual(sql, expected_sql)
+        self.assertEqual(params, expected_params)
+
+        self.assertIsNone(memo)
+
     def test_get_memo_error(self):
         original_exception = Exception("Database error")
         self.mock_connection.cursor.side_effect = original_exception
