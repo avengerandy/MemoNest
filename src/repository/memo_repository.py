@@ -168,3 +168,19 @@ class SQLiteMemoRepository(MemoRepositoryInterface):
             raise RepositoryError(
                 error_code, error_code.get_message(), error
             ) from error
+
+    def create_table_if_not_exists(self):
+        """Create the memos table if it does not exist."""
+
+        with self.connect:
+            cursor = self.connect.cursor()
+            cursor.execute(
+                (
+                    "CREATE TABLE IF NOT EXISTS memos (",
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT,",
+                    "title TEXT NOT NULL,",
+                    "create_date TEXT NOT NULL,",
+                    "update_date TEXT NOT NULL",
+                    ")",
+                )
+            )

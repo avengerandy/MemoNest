@@ -231,6 +231,22 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         self.assertEqual(str(context.exception), "Failed to get all memos")
         self.assertEqual(context.exception.original_exception, original_exception)
 
+    def test_create_table_if_not_exists(self):
+        self.repository.create_table_if_not_exists()
+        self.mock_connection.cursor.assert_called()
+        cursor_mock = self.mock_connection.cursor.return_value
+        cursor_mock.execute.assert_called()
+        sql = cursor_mock.execute.call_args[0][0]
+        expected_sql = (
+            "CREATE TABLE IF NOT EXISTS memos (",
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,",
+            "title TEXT NOT NULL,",
+            "create_date TEXT NOT NULL,",
+            "update_date TEXT NOT NULL",
+            ")",
+        )
+        self.assertEqual(sql, expected_sql)
+
 
 if __name__ == "__main__":
     unittest.main()
