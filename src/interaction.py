@@ -1,6 +1,7 @@
 """A module for defining use cases and output interfaces to interact with clients."""
 
 from abc import ABC, abstractmethod
+from typing import TypedDict
 
 
 class OutputHandler(ABC):
@@ -31,6 +32,44 @@ class ConsoleOutput(OutputHandler):
     def error_output(self, code: int, message: str) -> None:
         """Outputs the error message to the console."""
         print(f"Error code {code}: {message}")
+
+
+class MemoryOutput(OutputHandler):
+    """An output handler that stores data in memory."""
+
+    def __init__(self) -> None:
+        self.data = {}
+
+    def output(self, data: dict) -> None:
+        self.data.update(data)
+
+    def error_output(self, code: int, message: str) -> None:
+        self.data.update({"error": f"Error code {code}: {message}"})
+
+
+class MemoCreateData(TypedDict):
+    """A type for the data required to create a memo."""
+
+    title: str
+
+
+class MemoUpdateData(TypedDict):
+    """A type for the data required to update a memo."""
+
+    id: int
+    title: str
+
+
+class MemoGetData(TypedDict):
+    """A type for the data required to retrieve a memo."""
+
+    id: int
+
+
+class MemoDeleteData(TypedDict):
+    """A type for the data required to delete a memo."""
+
+    id: int
 
 
 class MemoNest(ABC):
@@ -69,11 +108,13 @@ class MemoNest(ABC):
             self.output_handler.error_output(code, message)
 
     @abstractmethod
-    def create_memo(self, data: dict) -> None:
-        """Creates a new memo with the given data."""
+    def create_memo(self, data: MemoCreateData) -> None:
+        """
+        Creates a new memo with the given data.
+        """
 
     @abstractmethod
-    def get_memo(self, data: dict) -> None:
+    def get_memo(self, data: MemoGetData) -> None:
         """Retrieves a memo with the given data."""
 
     @abstractmethod
@@ -81,9 +122,9 @@ class MemoNest(ABC):
         """Retrieves all memos."""
 
     @abstractmethod
-    def update_memo(self, data: dict) -> None:
+    def update_memo(self, data: MemoUpdateData) -> None:
         """Updates an existing memo with the given data."""
 
     @abstractmethod
-    def delete_memo(self, data: dict) -> None:
+    def delete_memo(self, data: MemoDeleteData) -> None:
         """Deletes a memo with the given data."""

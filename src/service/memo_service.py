@@ -8,7 +8,13 @@ from src.formatter.memo_formatter import (
     GetMemoFormatterFactory,
     UpdateMemoFormatterFactory,
 )
-from src.interaction import MemoNest
+from src.interaction import (
+    MemoCreateData,
+    MemoDeleteData,
+    MemoGetData,
+    MemoNest,
+    MemoUpdateData,
+)
 from src.repository.common import RepositoryError
 from src.repository.memo_repository import MemoRepositoryInterface
 
@@ -23,7 +29,7 @@ class MemoService(MemoNest):
         super().__init__()
         self.memo_repo = memo_repo
 
-    def create_memo(self, data: dict) -> None:
+    def create_memo(self, data: MemoCreateData) -> None:
         try:
             formatter = AddMemoFormatterFactory().create()
             data = formatter.handle(data)
@@ -37,7 +43,7 @@ class MemoService(MemoNest):
         except (FormatterError, RepositoryError) as error:
             self.error(error.code.value, error.code.get_message())
 
-    def get_memo(self, data: dict) -> None:
+    def get_memo(self, data: MemoGetData) -> None:
         try:
             formatter = GetMemoFormatterFactory().create()
             data = formatter.handle(data)
@@ -61,7 +67,7 @@ class MemoService(MemoNest):
         except RepositoryError as error:
             self.error(error.code.value, error.code.get_message())
 
-    def update_memo(self, data: dict) -> None:
+    def update_memo(self, data: MemoUpdateData) -> None:
         try:
             formatter = UpdateMemoFormatterFactory().create()
             data = formatter.handle(data)
@@ -78,7 +84,7 @@ class MemoService(MemoNest):
         except (FormatterError, RepositoryError) as error:
             self.error(error.code.value, error.code.get_message())
 
-    def delete_memo(self, data: dict) -> None:
+    def delete_memo(self, data: MemoDeleteData) -> None:
         try:
             formatter = DeleteMemoFormatterFactory().create()
             data = formatter.handle(data)
