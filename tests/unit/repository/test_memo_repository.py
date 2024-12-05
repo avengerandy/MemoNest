@@ -237,13 +237,15 @@ class TestSQLiteMemoRepository(unittest.TestCase):
         cursor_mock = self.mock_connection.cursor.return_value
         cursor_mock.execute.assert_called()
         sql = cursor_mock.execute.call_args[0][0]
-        expected_sql = (
-            "CREATE TABLE IF NOT EXISTS memos (",
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,",
-            "title TEXT NOT NULL,",
-            "create_date TEXT NOT NULL,",
-            "update_date TEXT NOT NULL",
-            ")",
+        expected_sql = "".join(
+            [
+                "CREATE TABLE IF NOT EXISTS memos (",
+                "id INTEGER PRIMARY KEY AUTOINCREMENT,",
+                "title TEXT NOT NULL,",
+                "create_date TEXT NOT NULL,",
+                "update_date TEXT NOT NULL",
+                ")",
+            ]
         )
         self.assertEqual(sql, expected_sql)
 

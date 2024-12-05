@@ -175,12 +175,14 @@ class SQLiteMemoRepository(MemoRepositoryInterface):
         with self.connect:
             cursor = self.connect.cursor()
             cursor.execute(
-                (
-                    "CREATE TABLE IF NOT EXISTS memos (",
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT,",
-                    "title TEXT NOT NULL,",
-                    "create_date TEXT NOT NULL,",
-                    "update_date TEXT NOT NULL",
-                    ")",
+                "".join(
+                    [
+                        "CREATE TABLE IF NOT EXISTS memos (",
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT,",
+                        "title TEXT NOT NULL,",
+                        "create_date TEXT NOT NULL,",
+                        "update_date TEXT NOT NULL",
+                        ")",
+                    ]
                 )
             )
