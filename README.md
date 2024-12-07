@@ -33,13 +33,14 @@ classDiagram
     interaction <-- client
 ```
 
-This system consists of five main layers:
+This system consists of six main layers:
 
 * `entity`: Defines the core business entities.
 * `repository`: Handles data access, reading and writing entity data.
 * `formatter`: Formats and validates data to ensure it complies with the required specifications.
 * `interaction`: Manages interactions with external systems (such as clients).
 * `service`: Executes business logic and coordinates other layers.
+* `factory`: Responsible for creating and assembling all components, handling dependency injection, and managing strategies for various use cases.
 
 ### process Overview
 
@@ -49,6 +50,9 @@ This system consists of five main layers:
 * The `repository layer` reads and writes data.
 * The `formatter layer` transforms the response data format.
 * The `interaction layer` responds to the client.
+* The `factory layer` creates and configures all required components (e.g., service, repository, formatter, interaction).
+
+> The `factory layer` is the most complex (dirty) part of the architecture. It needs to be familiar with all classes and is dependent on all other layers, which is why it is not included in the class diagram.
 
 ### advantages:
 
@@ -272,3 +276,67 @@ This design follows both the Dependency Inversion Principle and the Interface Se
 ### relation
 
 * The `service layer` depends on `MemoNest` & `ConsoleOutput` to interact with external systems (such as clients).
+
+## factory
+
+```mermaid
+classDiagram
+    namespace factory {
+        class MemoNestFactory {
+            +create_memo_nest(mode: MemoNestMode) --> MemoNest
+            +get_singleton_memo_nest() --> MemoNest
+            +get_shared_memo_nest() --> MemoNest
+            +get_isolation_memo_nest() --> MemoNest
+        }
+
+        class MemoNestMode {
+            <<enum>>
+            +SINGLE_USER
+            +COLLABORATION
+            +ISOLATION
+        }
+    }
+
+    class entity {
+        <<namespace>>
+    }
+
+    class repository {
+        <<namespace>>
+    }
+
+    class service {
+        <<namespace>>
+    }
+
+    class interaction {
+        <<namespace>>
+    }
+
+    class formatter {
+        <<namespace>>
+    }
+
+    MemoNestMode <-- MemoNestFactory
+    MemoNestFactory --> entity
+    MemoNestFactory --> service
+    MemoNestFactory --> interaction
+    MemoNestFactory --> formatter
+    MemoNestFactory --> repository
+```
+
+The factory layer is responsible for creating `MemoNest` instances for different scenarios.
+
+The `MemoNestFactory` implements the `Factory Pattern`, offering a unified interface to generate the appropriate `MemoNest` instances based on the chosen operational mode. The module supports three operation modes:
+
+1. Single-user mode: In this mode, all components (such as `MemoRepository` and `OutputHandler`) are singletons, shared across all operations.
+
+1. Multi-user Collaboration mode: In this mode, a shared `MemoRepository` is used, but a new `MemoNest` instance and `OutputHandler` are created for each operation.
+
+1. Multi-user Isolation mode: In this mode, a new `MemoNest`, `MemoRepository`, and `OutputHandler` instance are created for each operation, ensuring full isolation between users’ data and actions.
+
+This design ensures the system is scalable and flexible, adapting to different use cases while properly allocating resources for each scenario.
+
+### relation
+
+* The `factory layer` depends on all other layers.
