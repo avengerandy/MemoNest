@@ -9,3 +9,8 @@ echo "test code coding style check:"
 pylint --recursive=y --rcfile=./tests/.pylintrc tests
 black --check --diff tests
 isort --diff --profile black tests
+
+echo "example code coding style check:"
+pylint --recursive=y --rcfile=./example/.pylintrc example
+black --check --diff example
+isort --diff --profile black example
