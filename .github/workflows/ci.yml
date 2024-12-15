@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: github-pages
-          path: docs
+          path: docs/src
 
       - name: Deploy documentation to GitHub Pages
         id: deployment
