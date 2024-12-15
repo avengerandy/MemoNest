@@ -33,6 +33,7 @@ jobs:
 
   documentation:
     runs-on: ubuntu-latest
+    needs: ci
 
     steps:
       - name: Checkout code
@@ -49,8 +50,7 @@ jobs:
       - name: Build documentation
         run: pdoc3 --html --skip-errors --output-dir docs src
 
-      - name: Upload static files as artifact
-        id: deployment
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy documentation to GitHub Pages
+        uses: actions/deploy-pages@v4
         with:
           path: docs
