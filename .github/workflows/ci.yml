@@ -35,6 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: ci
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,6 +55,5 @@ jobs:
         run: pdoc3 --html --skip-errors --output-dir docs src
 
       - name: Deploy documentation to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          path: docs
