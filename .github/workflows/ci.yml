@@ -60,9 +60,8 @@ jobs:
         run: pdoc3 --html --skip-errors --output-dir docs src
 
       - name: Upload documentation as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
           path: docs/src
 
       - name: Deploy documentation to GitHub Pages
