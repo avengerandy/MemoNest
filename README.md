@@ -82,7 +82,7 @@ MemoNest is particularly useful in the following scenarios:
 
 ## System Design
 
-For a detailed explanation of the system architecture and design, please refer to the full **[System Design Document](https://github.com/yourusername/yourrepositoryname/blob/main/SYSTEM.md)**.
+For a detailed explanation of the system architecture and design, please refer to the full **[System Design Document](https://github.com/avengerandy/MemoNest/blob/master/SYSTEM.md)**.
 
 ## Usage Example
 
