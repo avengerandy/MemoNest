@@ -12,7 +12,6 @@ MemoNest is an exercise CURD memo project inspired by **Clean Architecture**, de
 
 ## Architecture Overview
 
-
 ```mermaid
 classDiagram
 
@@ -84,10 +83,14 @@ MemoNest is particularly useful in the following scenarios:
 
 For a detailed explanation of the system architecture and design, please refer to the full **[System Design Document](https://github.com/avengerandy/MemoNest/blob/master/SYSTEM.md)**.
 
+## API
+
+To learn about all the API classes and their methods, and how to use them, please visit our [API page](https://avengerandy.github.io/MemoNest/).
+
 ## Usage Example
 
 ## Testing
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/avengerandy/MemoNest/blob/master/LICENSE) file for more details.
