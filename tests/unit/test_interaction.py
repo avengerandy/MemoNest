@@ -2,7 +2,7 @@ import unittest
 from io import StringIO
 from unittest.mock import Mock, patch
 
-from src.interaction import ConsoleOutput, MemoNest, OutputHandler
+from src.interaction import ConsoleOutput, MemoNest, MemoryOutput, OutputHandler
 
 
 class TestMemoNest(unittest.TestCase):
@@ -72,6 +72,27 @@ class TestConsoleOutput(unittest.TestCase):
 
         output = mock_stdout.getvalue().strip()
         self.assertEqual(output, f"Error code {error_code}: {error_message}")
+
+
+class TestMemoryOutput(unittest.TestCase):
+    def test_output(self):
+        memory_output = MemoryOutput()
+        test_data = {"title": "Test Memo"}
+
+        memory_output.output(test_data)
+
+        self.assertEqual(memory_output.data, test_data)
+
+    def test_error_output(self):
+        memory_output = MemoryOutput()
+        error_code = 404
+        error_message = "Not Found"
+
+        memory_output.error_output(error_code, error_message)
+
+        self.assertEqual(
+            memory_output.data, {"error": f"Error code {error_code}: {error_message}"}
+        )
 
 
 if __name__ == "__main__":
