@@ -4,11 +4,19 @@ from fastapi import FastAPI
 from src.factory import MemoNestFactory, MemoNestMode
 from src.interaction import MemoCreateData, MemoDeleteData, MemoGetData, MemoUpdateData
 
-memo_nest_factory = MemoNestFactory()
+config = {
+    "sqlite": {
+        "mode": MemoNestMode.COLLABORATION,
+        "fixed_path": ":memory:",
+        "isolated_path": None,
+    }
+}
+
+memo_nest_factory = MemoNestFactory(config)
 
 
 def get_memo_nest():
-    return memo_nest_factory.create_memo_nest(MemoNestMode.COLLABORATION)
+    return memo_nest_factory.create_memo_nest()
 
 
 app = FastAPI()
@@ -50,4 +58,4 @@ async def delete_memo(data: MemoDeleteData):
 
 
 if __name__ == "__main__":
-    uvicorn.run("client.http_example:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("example.http_example:app", host="0.0.0.0", port=8000, reload=True)

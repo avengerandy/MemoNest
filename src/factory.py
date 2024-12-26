@@ -25,7 +25,7 @@ class MemoNestFactory:
     3. Multi-user isolation mode (new MemoNest, MemoRepository, and OutputHandler)
     """
 
-    def __init__(self) -> None:
+    def __init__(self, config: dict) -> None:
         """
         Initializes the factory with the provided database connection.
         """
@@ -33,8 +33,9 @@ class MemoNestFactory:
         self.memo_repo = None
         self.memo_nest = None
         self.output_handler = None
+        self.config = config
 
-    def create_memo_nest(self, mode: MemoNestMode) -> MemoNest:
+    def create_memo_nest(self) -> MemoNest:
         """
         Create a MemoNest instance based on the mode.
 
@@ -45,6 +46,8 @@ class MemoNestFactory:
         Returns:
             MemoNest: A configured MemoNest instance.
         """
+
+        mode = self.config.get("sqlite").get("mode")
 
         if mode == MemoNestMode.SINGLE_USER:
             return self.get_singleton_memo_nest()
@@ -90,9 +93,7 @@ class MemoNestFactory:
         """Return a single instance of MemoRepository for the single-user mode."""
 
         if self.memo_repo is None:
-            self.memo_repo = SQLiteMemoRepository(
-                self.get_singleton_database_connection()
-            )
+            self.memo_repo = self.get_new_memo_repository()
             self.memo_repo.create_table_if_not_exists()
 
         return self.memo_repo
@@ -109,14 +110,19 @@ class MemoNestFactory:
         """Return a single instance of the database connection for the single-user mode."""
 
         if self.database_connection is None:
-            self.database_connection = sqlite3.connect(":memory:")
+            self.database_connection = self.get_new_database_connection()
 
         return self.database_connection
 
     def get_new_database_connection(self) -> sqlite3.Connection:
         """Return a new database connection each time in isolation mode."""
 
-        return sqlite3.connect(":memory:")
+        if self.config.get("sqlite").get("mode") == MemoNestMode.ISOLATION:
+            path = self.config.get("sqlite").get("isolated_path")()
+        else:
+            path = self.config.get("sqlite").get("fixed_path")
+
+        return sqlite3.connect(path)
 
     def get_singleton_output_handler(self) -> OutputHandler:
         """Return a single instance of OutputHandler for the single-user mode."""

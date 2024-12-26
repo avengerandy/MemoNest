@@ -35,8 +35,16 @@ class ConsoleJsonOutput(OutputHandler):
         print("\n")
 
 
-memo_nest_factory = MemoNestFactory()
-memo_nest = memo_nest_factory.create_memo_nest(MemoNestMode.SINGLE_USER)
+config = {
+    "sqlite": {
+        "mode": MemoNestMode.SINGLE_USER,
+        "fixed_path": ":memory:",
+        "isolated_path": None,
+    }
+}
+
+memo_nest_factory = MemoNestFactory(config)
+memo_nest = memo_nest_factory.create_memo_nest()
 memo_nest.set_output(ConsoleJsonOutput())
 
 
